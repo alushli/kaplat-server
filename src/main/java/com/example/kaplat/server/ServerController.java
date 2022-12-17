@@ -1,12 +1,13 @@
 package com.example.kaplat.server;
 
-import com.example.kaplat.server.dto.AddArgumentsRequestDto;
-import com.example.kaplat.server.dto.IndependentCalculationRequestDto;
 import com.example.kaplat.server.dto.ResponseDto;
 import com.example.kaplat.server.enums.ErrorMessageController;
 import com.example.kaplat.server.enums.ErrorMessageEnum;
 import com.example.kaplat.server.enums.HttpResponseCode;
 import com.example.kaplat.server.enums.OperationEnum;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,12 @@ public class ServerController {
     @Autowired
     private ErrorMessageController errorMessageController;
 
-    public HttpResponseCode twoArgumentsOperatorExecute(int argument1, int argument2, OperationEnum operation, ResponseDto result) {
+    @Autowired
+    private RequestCounterController requestCounterController;
+
+    private final Logger logger = LogManager.getLogger("request-logger");
+
+    public HttpResponseCode twoArgumentsOperatorExecute(int argument1, int argument2, OperationEnum operation, ResponseDto result) throws Exception {
         switch (operation) {
             case Plus:
                 result.setResult(Optional.of(argument1 + argument2));
@@ -35,7 +41,7 @@ public class ServerController {
                 if (argument2 == 0) {
                     result.setResult(null);
                     result.setErrorMessage(Optional.of(errorMessageController.createErrorMessage(ErrorMessageEnum.DIVISION_BY_0, operation.name(), 0, 0)));
-                    return HttpResponseCode.CONFLICT_RESPONSE;
+                    throw new Exception();
                 } else {
                     result.setResult(Optional.of(argument1 / argument2));
                     setSuccessesResult(result);
@@ -49,7 +55,7 @@ public class ServerController {
         return HttpResponseCode.OK_RESPONSE;
     }
 
-    public HttpResponseCode oneArgumentOperatorExecute(int argument, OperationEnum operation, ResponseDto result) {
+    public HttpResponseCode oneArgumentOperatorExecute(int argument, OperationEnum operation, ResponseDto result) throws Exception {
         switch (operation) {
             case Abs:
                 result.setResult(Optional.of(Math.abs(argument)));
@@ -59,7 +65,7 @@ public class ServerController {
                 if (argument < 0) {
                     result.setResult(null);
                     result.setErrorMessage(Optional.of(errorMessageController.createErrorMessage(ErrorMessageEnum.FACTORIAL, operation.name(), 0, 0)));
-                    return HttpResponseCode.CONFLICT_RESPONSE;
+                    throw new Exception();
                 } else {
                     result.setResult(Optional.of(fact(argument)));
                     setSuccessesResult(result);
@@ -90,4 +96,10 @@ public class ServerController {
         return null;
     }
 
-   }
+    public void printLogForRequest(HttpServletRequest request, long requestTime) {
+        logger.info("Incoming request | #{} | resource: {} | HTTP Verb {}",
+                requestCounterController.getRequestCounter(), request.getRequestURI(), request.getMethod());
+        logger.debug("request #{} | duration: {}",
+                requestCounterController.getRequestCounter(), requestTime);
+    }
+}

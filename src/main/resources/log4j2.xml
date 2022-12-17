@@ -1,11 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{dd-mm-yyyy hh:mm:ss.sss} %p: %msg | request #%X{REQUEST_COUNTER}%n</Property>
+    </Properties>
+
     <Appenders>
-        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern=""/>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
+        <File name="RequestFileAppender" fileName="logs/requests.log">
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </File>
+
+        <File name="StackFileAppender" fileName="logs/stack.log" >
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </File>
+
+        <File name="IndependentFileAppender" fileName="logs/independent.log" >
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+        </File>
     </Appenders>
     <Loggers>
+        <logger name="request-logger" level="debug" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="RequestFileAppender" />
+        </logger>
+
+        <logger name="stack-logger" level="info" additivity="false">
+            <AppenderRef ref="StackFileAppender" />
+        </logger>
+
+        <logger name="independent-logger" level="debug" additivity="false">
+            <AppenderRef ref="IndependentFileAppender" />
+        </logger>
 
         <Root level="error">
             <AppenderRef ref="ConsoleAppender" />
