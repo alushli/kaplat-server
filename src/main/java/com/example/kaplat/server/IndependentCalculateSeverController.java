@@ -43,9 +43,9 @@ public class IndependentCalculateSeverController {
         ResponseDto result = new ResponseDto();
         OperationEnum operation;
         HttpResponseCode responseCode = null;
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             requestCounterController.increaseCounter();
             operation = serverController.getOperator(arguments.getOperation());
             if (operation == null) {
@@ -58,28 +58,29 @@ public class IndependentCalculateSeverController {
                 case Divide:
                 case Pow:
                     responseCode = this.twoArgumentsOperator(arguments, operation, result);
-                    logger.info("Performing operation {}. Result is {}", arguments.getArguments(), result.getResult());
-                    logger.debug("Performing operation: {}({},{}) = {}", operation, arguments.getArguments().get(0), arguments.getArguments().get(1), result.getResult());
+                    logger.info("Performing operation {}. Result is {}", arguments.getOperation(), result.getResult().get());
+                    logger.debug("Performing operation: {}({},{}) = {}", arguments.getOperation(), arguments.getArguments().get(0), arguments.getArguments().get(1), result.getResult().get());
                     break;
                 case Abs:
                 case Fact:
                     responseCode = this.oneArgumentOperator(arguments, operation, result);
-                    logger.info("Performing operation {}. Result is {}", arguments.getArguments(), result.getResult());
+                    logger.info("Performing operation {}. Result is {}", arguments.getArguments(), result.getResult().get());
                     logger.debug("Performing operation: {}({}) = {}", operation, arguments.getArguments().get(0), result.getResult());
                     break;
             }
             endRequest = Instant.now();
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
-            logger.info("Performing operation {}. Result is {}", arguments.getOperation(), result.getResult());
             return ResponseEntity.status(responseCode.getResponseCode()).body(result);
         } catch (IllegalArgumentException e) {
             result.setResult(null);
             result.setErrorMessage(Optional.of(errorMessageController.createErrorMessage(ErrorMessageEnum.NO_SUCH_OPERATION, arguments.getOperation(),0 , 0)));
-            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage());
+            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         } catch (Exception e) {
-            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage());
+            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
+        }
+        finally {
+            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
         }
     }
 

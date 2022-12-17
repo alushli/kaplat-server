@@ -29,35 +29,41 @@ public class LoggerServerController {
 
     @GetMapping("/level")
     public ResponseEntity<String> getLoggerLevel(@RequestParam(name = "logger-name") String loggerName) {
+        startRequest = Instant.now();
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
         try {
-            startRequest = Instant.now();
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             requestCounterController.increaseCounter();
             Logger selectedLogger = LogManager.getLogger(loggerName);
             endRequest = Instant.now();
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
             return ResponseEntity.status(HttpResponseCode.OK_RESPONSE.getResponseCode()).body(selectedLogger.getLevel().name());
         } catch (Exception e) {
             String errorMessage = "an error occurred while trying to get logger level";
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(errorMessage);
+        }
+        finally {
+            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
         }
     }
 
     @PutMapping("/level")
     public ResponseEntity<String> setLoggerLevel(@RequestParam(name = "logger-name") String loggerName,
                                                  @RequestParam(name = "logger-level") String loggerLevel) {
+        startRequest = Instant.now();
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
         try {
-            startRequest = Instant.now();
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             requestCounterController.increaseCounter();
             Logger selectedLogger = LogManager.getLogger(loggerName);
             Configurator.setLevel(selectedLogger, Level.getLevel(loggerLevel));
             endRequest = Instant.now();
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
             return ResponseEntity.status(HttpResponseCode.OK_RESPONSE.getResponseCode()).body(selectedLogger.getLevel().name());
         } catch (Exception e) {
             String errorMessage = "an error occurred while trying to get logger level";
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(errorMessage);
+        }
+        finally {
+            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
         }
     }
 }

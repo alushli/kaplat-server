@@ -99,7 +99,7 @@ public class ServerController {
     public void printLogForRequest(HttpServletRequest request, long requestTime) {
         logger.info("Incoming request | #{} | resource: {} | HTTP Verb {}",
                 requestCounterController.getRequestCounter(), request.getRequestURI(), request.getMethod());
-        logger.debug("request #{} | duration: {}",
+        logger.debug("request #{} duration: {}",
                 requestCounterController.getRequestCounter(), requestTime);
     }
 }

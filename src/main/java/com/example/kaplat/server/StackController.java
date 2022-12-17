@@ -1,10 +1,9 @@
 package com.example.kaplat.server;
 
-import com.example.kaplat.server.enums.OperationEnum;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import java.util.Stack;
+import java.util.*;
 
 @Component
 @Getter
@@ -27,5 +26,20 @@ public class StackController {
         for (int i = 0 ; i < amount ; i++) {
             this.popFromStack();
         }
+    }
+
+    private ArrayList<Integer> getStackAsList() {
+        List<Integer> list = this.stack.stream().toList();
+        ArrayList arrayList = new ArrayList();
+        for (int number: list) {
+            arrayList.add(number);
+        }
+        return arrayList;
+    }
+
+    ArrayList<Integer> getReverseStackAsList() {
+        ArrayList<Integer> list = this.getStackAsList();
+        Collections.reverse(list);
+        return list;
     }
 }
