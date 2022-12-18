@@ -60,10 +60,10 @@ public class IndependentCalculateSeverController {
         } catch (IllegalArgumentException e) {
             result.setResult(null);
             result.setErrorMessage(Optional.of(errorMessageController.createErrorMessage(ErrorMessageEnum.NO_SUCH_OPERATION, arguments.getOperation(),0 , 0)));
-            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage().get());
+            logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         } catch (Exception e) {
-            logger.error(" Server encountered an error ! message: error-message: {}", result.getErrorMessage().get());
+            logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         }
     }
