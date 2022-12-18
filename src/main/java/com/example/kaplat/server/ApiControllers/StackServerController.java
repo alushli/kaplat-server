@@ -1,22 +1,18 @@
-package com.example.kaplat.server;
+package com.example.kaplat.server.ApiControllers;
 
+import com.example.kaplat.server.ServerController;
+import com.example.kaplat.server.StackController;
 import com.example.kaplat.server.dto.AddArgumentsRequestDto;
 import com.example.kaplat.server.dto.ResponseDto;
 import com.example.kaplat.server.enums.ErrorMessageController;
 import com.example.kaplat.server.enums.ErrorMessageEnum;
 import com.example.kaplat.server.enums.HttpResponseCode;
 import com.example.kaplat.server.enums.OperationEnum;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 @RestController
@@ -31,23 +27,15 @@ public class StackServerController {
     @Autowired
     private ServerController serverController;
 
-    @Autowired
-    private RequestCounterController requestCounterController;
-
     private final Logger logger = LogManager.getLogger("stack-logger");
-    private Instant startRequest, endRequest;
 
     @GetMapping("/size")
     public ResponseEntity<ResponseDto> getStackSize() {
-        startRequest = Instant.now();
         ResponseDto result = new ResponseDto();
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         try {
-            requestCounterController.increaseCounter();
             serverController.setSuccessesResult(result);
             result.setResult(Optional.of(this.stackController.getStackSize()));
-            endRequest = Instant.now();
             logger.info("Stack size is {}", this.stackController.getStackSize());
             logger.debug("Stack content (first == top): [{}]", this.stackController.getReverseStackAsList()
                     .toString().replace("[","").replace("]",""));
@@ -56,49 +44,36 @@ public class StackServerController {
             logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         }
-        finally {
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
-        }
     }
 
     @PutMapping("/arguments")
     public ResponseEntity<ResponseDto> addArgumentsToStack(@RequestBody AddArgumentsRequestDto arguments) {
-        startRequest = Instant.now();
         ResponseDto result = new ResponseDto();
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         try {
-            requestCounterController.increaseCounter();
             for (int numberToAdd : arguments.getArguments()) {
                 this.stackController.pushToStack(numberToAdd);
             }
             serverController.setSuccessesResult(result);
             result.setResult(Optional.of(this.stackController.getStackSize()));
-            endRequest = Instant.now();
             logger.info("Adding total of {} argument(s) to the stack | Stack size: {}", arguments.getArguments().size(), this.stackController.getStackSize());
             logger.debug("Adding arguments: {} | Stack size before {} | stack size after {}", arguments.getArguments().toString()
-                    .replace("[","").replace("]","").replace(" ",""),
+                    .replace("[","").replace("]",""),
                     this.stackController.getStackSize() - arguments.getArguments().size(), this.stackController.getStackSize());
             return ResponseEntity.status(HttpResponseCode.OK_RESPONSE.getResponseCode()).body(result);
         } catch (Exception e) {
             logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         }
-        finally {
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
-        }
     }
 
     @GetMapping("/operate")
     public ResponseEntity<ResponseDto> performOperation(@RequestParam(name = "operation") String operation) {
-        startRequest = Instant.now();
         ResponseDto result = new ResponseDto();
         OperationEnum operationEnum;
         HttpResponseCode responseCode = null;
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         try {
-            requestCounterController.increaseCounter();
             operationEnum = serverController.getOperator(operation);
             if (operationEnum == null) {
                 throw new IllegalArgumentException();
@@ -122,7 +97,6 @@ public class StackServerController {
                     logger.debug("Performing operation: {}({}) = {}", operation, removedNumber.get(0), result.getResult().get());
                     break;
             }
-            endRequest = Instant.now();
             return ResponseEntity.status(responseCode.getResponseCode()).body(result);
         } catch (IllegalArgumentException e) {
             result.setResult(null);
@@ -133,19 +107,13 @@ public class StackServerController {
             logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
         }
-        finally {
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
-        }
     }
 
     @DeleteMapping("/arguments")
     public ResponseEntity<ResponseDto> deleteArguments(@RequestParam(name = "count") int totalArgumentsToPop) {
-        startRequest = Instant.now();
         ResponseDto result = new ResponseDto();
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         try {
-            requestCounterController.increaseCounter();
             if (this.stackController.getStackSize() < totalArgumentsToPop) {
                 result.setErrorMessage(Optional.of(errorMessageController.createErrorMessage(ErrorMessageEnum.ERROR_OPERATION_INVOKED, null, totalArgumentsToPop, this.stackController.getStackSize())));
                 return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
@@ -153,15 +121,11 @@ public class StackServerController {
             this.stackController.popAmountFromStack(totalArgumentsToPop);
             serverController.setSuccessesResult(result);
             result.setResult(Optional.of(this.stackController.getStackSize()));
-            endRequest = Instant.now();
             logger.info("Removing total {} argument(s) from the stack | Stack size: {}", totalArgumentsToPop, this.stackController.getStackSize());
             return ResponseEntity.status(HttpResponseCode.OK_RESPONSE.getResponseCode()).body(result);
         } catch (Exception e) {
             logger.error("Server encountered an error ! message: {}", result.getErrorMessage().get());
             return ResponseEntity.status(HttpResponseCode.CONFLICT_RESPONSE.getResponseCode()).body(result);
-        }
-        finally {
-            serverController.printLogForRequest(request, Duration.between(startRequest, endRequest).toMillis());
         }
     }
 

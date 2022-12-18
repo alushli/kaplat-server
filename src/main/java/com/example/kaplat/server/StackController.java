@@ -37,7 +37,7 @@ public class StackController {
         return arrayList;
     }
 
-    ArrayList<Integer> getReverseStackAsList() {
+    public ArrayList<Integer> getReverseStackAsList() {
         ArrayList<Integer> list = this.getStackAsList();
         Collections.reverse(list);
         return list;

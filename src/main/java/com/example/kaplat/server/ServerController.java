@@ -5,9 +5,6 @@ import com.example.kaplat.server.enums.ErrorMessageController;
 import com.example.kaplat.server.enums.ErrorMessageEnum;
 import com.example.kaplat.server.enums.HttpResponseCode;
 import com.example.kaplat.server.enums.OperationEnum;
-import jakarta.servlet.http.HttpServletRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +14,6 @@ import java.util.Optional;
 public class ServerController {
     @Autowired
     private ErrorMessageController errorMessageController;
-
-    @Autowired
-    private RequestCounterController requestCounterController;
-
-    private final Logger logger = LogManager.getLogger("request-logger");
 
     public HttpResponseCode twoArgumentsOperatorExecute(int argument1, int argument2, OperationEnum operation, ResponseDto result) throws Exception {
         switch (operation) {
@@ -94,12 +86,5 @@ public class ServerController {
                 return operationEnum;
         }
         return null;
-    }
-
-    public void printLogForRequest(HttpServletRequest request, long requestTime) {
-        logger.info("Incoming request | #{} | resource: {} | HTTP Verb {}",
-                requestCounterController.getRequestCounter(), request.getRequestURI(), request.getMethod());
-        logger.debug("request #{} duration: {}",
-                requestCounterController.getRequestCounter(), requestTime);
     }
 }
