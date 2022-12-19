@@ -28,10 +28,10 @@ public class LogAspect {
         Instant startRequest = Instant.now();
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         requestCounterController.increaseCounter();
-        Object process = proceedingJoinPoint.proceed();
-        Instant endRequest = Instant.now();
         logger.info("Incoming request | #{} | resource: {} | HTTP Verb {}",
                 requestCounterController.getRequestCounter(), request.getRequestURI(), request.getMethod());
+        Object process = proceedingJoinPoint.proceed();
+        Instant endRequest = Instant.now();
         logger.debug("request #{} duration: {}",
                 requestCounterController.getRequestCounter(), Duration.between(startRequest, endRequest).toMillis());
         return process;
