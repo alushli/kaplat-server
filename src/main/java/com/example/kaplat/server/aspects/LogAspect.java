@@ -32,7 +32,7 @@ public class LogAspect {
                 requestCounterController.getRequestCounter(), request.getRequestURI(), request.getMethod());
         Object process = proceedingJoinPoint.proceed();
         Instant endRequest = Instant.now();
-        logger.debug("request #{} duration: {}",
+        logger.debug("request #{} duration: {}ms",
                 requestCounterController.getRequestCounter(), Duration.between(startRequest, endRequest).toMillis());
         return process;
     }
