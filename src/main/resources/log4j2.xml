@@ -8,19 +8,19 @@
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-        <File name="RequestFileAppender" fileName="logs/requests.log">
+        <File name="RequestFileAppender" fileName="logs/requests.log" append="false">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>
             </PatternLayout>
         </File>
 
-        <File name="StackFileAppender" fileName="logs/stack.log" >
+        <File name="StackFileAppender" fileName="logs/stack.log" append="false">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>
             </PatternLayout>
         </File>
 
-        <File name="IndependentFileAppender" fileName="logs/independent.log" >
+        <File name="IndependentFileAppender" fileName="logs/independent.log" append="false">
             <PatternLayout>
                 <Pattern>${LOG_PATTERN}</Pattern>
             </PatternLayout>
